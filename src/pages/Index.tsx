@@ -24,29 +24,20 @@ const Index = () => {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="float">
             <div className="mb-6 flex items-center justify-center flex-col">
-              <div className="flex items-center justify-center space-x-6 mb-4">
-                <img 
-                  src={veritasLogo} 
-                  alt="Veritas Logo" 
-                  className="w-16 h-16 sm:w-20 sm:h-20 animate-pulse"
-                />
-                <div>
-                  <h2 className="text-lg sm:text-xl font-medium text-muted-foreground mb-2 slide-in-left">
-                    Latin by Truth
-                  </h2>
-                  <h1 className="text-4xl sm:text-6xl lg:text-8xl font-orbitron font-black bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent animate-pulse hero-glow slide-in-right">
-                    VERITAS
-                  </h1>
-                </div>
-              </div>
+              <h1 className="text-4xl sm:text-6xl lg:text-8xl font-orbitron font-black bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent hero-glow slide-in-right mb-4">
+                VERITAS
+              </h1>
+              <h2 className="text-lg sm:text-xl font-medium text-muted-foreground mb-4 slide-in-left">
+                Latin by 'Truth', powered by AI
+              </h2>
               <p className="text-xl sm:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Powered by AI • Advanced Misinformation Detection Platform
+                Advanced Misinformation Detection Platform
               </p>
             </div>
 
             <div className="mt-12 space-y-6 sm:space-y-0 sm:flex sm:items-center sm:justify-center sm:space-x-8">
               <Link to="/dashboard?type=text">
-                <Button size="lg" className="group bg-gradient-primary border-0 hover:scale-105 transition-all duration-300 pulse-glow animate-pulse shadow-lg shadow-cyan-500/25">
+                <Button size="lg" className="group bg-gradient-primary border-0 hover:scale-105 transition-all duration-300 shadow-lg shadow-cyan-500/25">
                   <FileText className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
                   Analyze Text
                 </Button>
@@ -131,12 +122,11 @@ const Index = () => {
               Join thousands of professionals using Veritas to combat fake news and maintain information integrity.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-              <Button size="lg" className="bg-gradient-primary border-0 hover:scale-105 transition-all duration-300">
-                Start Free Analysis
-              </Button>
-              <Button size="lg" variant="outline" className="hover:scale-105 transition-all duration-300">
-                View Demo
-              </Button>
+              <Link to="/dashboard">
+                <Button size="lg" className="bg-gradient-primary border-0 hover:scale-105 transition-all duration-300">
+                  Start Free Analysis
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
