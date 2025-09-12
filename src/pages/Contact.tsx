@@ -62,18 +62,6 @@ const Contact = () => {
       description: "For general inquiries and support"
     },
     {
-      icon: <Phone className="h-5 w-5" />,
-      title: "Call Us",
-      content: "+1 (555) 123-4567",
-      description: "Monday to Friday, 9AM - 6PM EST"
-    },
-    {
-      icon: <MapPin className="h-5 w-5" />,
-      title: "Visit Us",
-      content: "San Francisco, CA",
-      description: "123 Tech Street, Suite 456"
-    },
-    {
       icon: <Clock className="h-5 w-5" />,
       title: "Response Time",
       content: "< 24 hours",

@@ -1,13 +1,11 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/Layout";
-import { StatCard } from "@/components/StatCard";
-import { useStats } from "@/hooks/useStats";
-import { FileText, Headphones, Video, Shield, Zap, Target, CheckCircle2, Users } from "lucide-react";
+import { FileText, Headphones, Video, Shield, Zap, Users } from "lucide-react";
 import heroImage from "@/assets/hero-bg.jpg";
+import veritasLogo from "@/assets/veritas-shield-logo.png";
 
 const Index = () => {
-  const { stats } = useStats();
 
   return (
     <Layout>
@@ -25,13 +23,22 @@ const Index = () => {
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="float">
-            <div className="mb-6">
-              <h2 className="text-lg sm:text-xl font-medium text-muted-foreground mb-2 slide-in-left">
-                Latin by Truth
-              </h2>
-              <h1 className="text-6xl sm:text-8xl lg:text-9xl font-orbitron font-black hero-title mb-6 slide-in-right">
-                VERITAS
-              </h1>
+            <div className="mb-6 flex items-center justify-center flex-col">
+              <div className="flex items-center justify-center space-x-6 mb-4">
+                <img 
+                  src={veritasLogo} 
+                  alt="Veritas Logo" 
+                  className="w-16 h-16 sm:w-20 sm:h-20 animate-pulse"
+                />
+                <div>
+                  <h2 className="text-lg sm:text-xl font-medium text-muted-foreground mb-2 slide-in-left">
+                    Latin by Truth
+                  </h2>
+                  <h1 className="text-4xl sm:text-6xl lg:text-8xl font-orbitron font-black bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent animate-pulse hero-glow slide-in-right">
+                    VERITAS
+                  </h1>
+                </div>
+              </div>
               <p className="text-xl sm:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                 Powered by AI • Advanced Misinformation Detection Platform
               </p>
@@ -39,21 +46,21 @@ const Index = () => {
 
             <div className="mt-12 space-y-6 sm:space-y-0 sm:flex sm:items-center sm:justify-center sm:space-x-8">
               <Link to="/dashboard?type=text">
-                <Button size="lg" className="group bg-gradient-primary border-0 hover:scale-105 transition-all duration-300 pulse-glow">
+                <Button size="lg" className="group bg-gradient-primary border-0 hover:scale-105 transition-all duration-300 pulse-glow animate-pulse shadow-lg shadow-cyan-500/25">
                   <FileText className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
                   Analyze Text
                 </Button>
               </Link>
               
               <Link to="/dashboard?type=audio">
-                <Button size="lg" variant="outline" className="group hover:scale-105 transition-all duration-300">
+                <Button size="lg" variant="outline" className="group hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/25">
                   <Headphones className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
                   Analyze Audio
                 </Button>
               </Link>
               
               <Link to="/dashboard?type=video">
-                <Button size="lg" variant="outline" className="group hover:scale-105 transition-all duration-300">
+                <Button size="lg" variant="outline" className="group hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25">
                   <Video className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
                   Analyze Video
                 </Button>
@@ -70,44 +77,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Real-Time Performance</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Our AI continuously learns and improves, delivering industry-leading accuracy in misinformation detection.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard
-              title="Accuracy Rate"
-              value={stats.accuracy}
-              suffix="%"
-              icon={<Target className="h-6 w-6" />}
-            />
-            <StatCard
-              title="Content Analyzed"
-              value={stats.contentAnalyzed}
-              suffix="+"
-              icon={<Shield className="h-6 w-6" />}
-            />
-            <StatCard
-              title="Processing Speed"
-              value="2.3"
-              suffix="s"
-              icon={<Zap className="h-6 w-6" />}
-            />
-            <StatCard
-              title="Trust Score"
-              value="98.7"
-              suffix="%"
-              icon={<CheckCircle2 className="h-6 w-6" />}
-            />
-          </div>
-        </div>
-      </section>
 
       {/* Features Section */}
       <section className="py-20 bg-card/50">
