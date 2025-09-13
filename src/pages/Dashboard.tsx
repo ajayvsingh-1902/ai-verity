@@ -31,6 +31,8 @@ interface AnalysisResult {
     credibilityScore: number;
     riskFactors: string[];
     sources: number;
+    faceResult?: { label: string; confidence: number };
+    audioResult?: { label: string; confidence: number };
   };
 }
 
@@ -44,7 +46,7 @@ const Dashboard = () => {
   const [dragActive, setDragActive] = useState(false);
   const [url, setUrl] = useState("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  
+
   const { incrementStats } = useStats();
   const { toast } = useToast();
 
@@ -69,39 +71,19 @@ const Dashboard = () => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     const files = e.dataTransfer.files;
     if (files && files[0]) {
       setUploadedFile(files[0]);
+      setUrl("");
     }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setUploadedFile(e.target.files[0]);
+      setUrl("");
     }
-  };
-
-  const simulateAnalysis = async (): Promise<AnalysisResult> => {
-    // Simulate AI analysis
-    const confidence = Math.random() * 30 + 70; // 70-100%
-    const isAuthentic = confidence > 85;
-    
-    return {
-      id: Date.now().toString(),
-      type: selectedType,
-      filename: uploadedFile?.name || url || `${selectedType}-content`,
-      result: isAuthentic ? "authentic" : "fake",
-      confidence: Math.round(confidence),
-      timestamp: new Date(),
-      analysis: {
-        credibilityScore: Math.round(confidence),
-        riskFactors: isAuthentic 
-          ? ["Verified sources", "Consistent metadata", "No manipulation detected"]
-          : ["Suspicious patterns", "Inconsistent metadata", "Potential deepfake elements"],
-        sources: Math.floor(Math.random() * 10) + 1,
-      },
-    };
   };
 
   const handleAnalyze = async () => {
@@ -115,38 +97,107 @@ const Dashboard = () => {
     }
 
     setIsAnalyzing(true);
-    
-    try {
-      // Simulate analysis time
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      const result = await simulateAnalysis();
-      setResults(prev => [result, ...prev]);
-      incrementStats();
-      
-      // Save to history
-      const history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
-      history.unshift(result);
-      localStorage.setItem('analysisHistory', JSON.stringify(history.slice(0, 50))); // Keep last 50
-      
+
+    let endpoint = "";
+    let body: BodyInit | null = null;
+    let headers: HeadersInit = {};
+
+    if (selectedType === "text") {
+      endpoint = "http://localhost:5000/api/analyze-text";
+      headers = { "Content-Type": "application/json" };
+      body = JSON.stringify({ text: url });
+    } else if (selectedType === "video" && url) {
+      endpoint = "http://localhost:5000/api/analyze-video-url";
+      headers = { "Content-Type": "application/json" };
+      body = JSON.stringify({ url });
+    } else if (uploadedFile) {
+      const formData = new FormData();
+      formData.append("file", uploadedFile);
+      body = formData;
+
+      if (selectedType === "audio") {
+        endpoint = "http://localhost:5000/api/analyze-audio";
+      } else if (selectedType === "video") {
+        endpoint = "http://localhost:5000/api/analyze-video-file";
+      }
+    }
+
+    if (!endpoint || !body) {
       toast({
-        title: "Analysis Complete",
-        description: `Content analyzed with ${result.confidence}% confidence`,
-        variant: result.result === "authentic" ? "default" : "destructive",
+        description: "Invalid analysis type or input.",
+        variant: "destructive",
       });
-      
-      // Reset form
-      setUploadedFile(null);
-      setUrl("");
-      
+      setIsAnalyzing(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers,
+        body,
+      });
+      if (!response.ok) throw new Error("Analysis request failed.");
+      const data = await response.json();
+
+      let newResult: AnalysisResult;
+
+      if (selectedType === "video") {
+        const faceIsReal = data.face_result.label.toLowerCase() === "real";
+        const audioIsReal = data.audio_result.label.toLowerCase() === "bonafide";
+        const isAuthentic = faceIsReal && audioIsReal;
+
+        newResult = {
+          id: Date.now().toString(),
+          type: "video",
+          filename: uploadedFile?.name || url,
+          result: isAuthentic ? "authentic" : "fake",
+          confidence: Math.round(data.overall_confidence * 100),
+          timestamp: new Date(),
+          analysis: {
+            credibilityScore: Math.round(data.overall_confidence * 100),
+            riskFactors: !isAuthentic
+              ? [
+                  `Face: ${data.face_result.label}`,
+                  `Audio: ${data.audio_result.label}`,
+                ]
+              : ["Components verified"],
+            sources: 0,
+            faceResult: data.face_result,
+            audioResult: data.audio_result,
+          },
+        };
+      }
+      else {
+        newResult = {
+          id: Date.now().toString(),
+          type: selectedType,
+          filename: uploadedFile?.name || url,
+          result: data.is_fake ? 'fake' : 'authentic',
+          confidence: Math.round(data.confidence * 100),
+          timestamp: new Date(),
+          analysis: {
+            credibilityScore: Math.round(data.confidence * 100),
+            riskFactors: data.is_fake ? ["AI detected suspicious patterns"] : ["Content appears authentic"],
+            sources: 0,
+          },
+        };
+      }
+
+      setResults(prev => [newResult, ...prev]);
+      incrementStats();
+      toast({ title: "Analysis Complete", description: `Result: ${newResult.result.toUpperCase()}`})
     } catch (error) {
+      console.error("Analysis error:", error);
       toast({
         title: "Analysis Failed",
-        description: "Please try again later",
+        description: "Could not connect to the service.",
         variant: "destructive",
       });
     } finally {
       setIsAnalyzing(false);
+      setUploadedFile(null);
+      setUrl("");
     }
   };
 
@@ -208,19 +259,25 @@ const Dashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-3 gap-4">
-                    {(["text", "audio", "video"] as AnalysisType[]).map((type) => (
-                      <Button
-                        key={type}
-                        variant={selectedType === type ? "default" : "outline"}
-                        onClick={() => setSelectedType(type)}
-                        className={`flex items-center space-x-2 h-12 ${
-                          selectedType === type ? "bg-gradient-primary border-0" : ""
-                        }`}
-                      >
-                        {getTypeIcon(type)}
-                        <span className="capitalize">{type}</span>
-                      </Button>
-                    ))}
+                    {(["text", "audio", "video"] as AnalysisType[]).map(
+                      (type) => (
+                        <Button
+                          key={type}
+                          variant={
+                            selectedType === type ? "default" : "outline"
+                          }
+                          onClick={() => setSelectedType(type)}
+                          className={`flex items-center space-x-2 h-12 ${
+                            selectedType === type
+                              ? "bg-gradient-primary border-0"
+                              : ""
+                          }`}
+                        >
+                          {getTypeIcon(type)}
+                          <span className="capitalize">{type}</span>
+                        </Button>
+                      )
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -242,7 +299,7 @@ const Dashboard = () => {
                       placeholder={getUrlPlaceholder()}
                       className="flex-1 px-3 py-2 bg-input border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
                     />
-                    <Button 
+                    <Button
                       onClick={handleAnalyze}
                       disabled={isAnalyzing || (!url && !uploadedFile)}
                       className="bg-gradient-primary border-0"
@@ -301,7 +358,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="mt-4 flex justify-center">
                     <Button
                       onClick={handleAnalyze}
@@ -344,32 +401,61 @@ const Dashboard = () => {
                           key={result.id}
                           className={`p-4 rounded-lg border ${
                             result.result === "authentic"
-                              ? "border-success/20 bg-success/5"
-                              : "border-destructive/20 bg-destructive/5"
+                              ? "border-green-500/20 bg-green-500/5"
+                              : "border-red-500/20 bg-red-500/5"
                           }`}
                         >
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center space-x-2">
                               {result.result === "authentic" ? (
-                                <CheckCircle className="h-4 w-4 text-success" />
+                                <CheckCircle className="h-4 w-4 text-green-500" />
                               ) : (
-                                <AlertCircle className="h-4 w-4 text-destructive" />
+                                <AlertCircle className="h-4 w-4 text-red-500" />
                               )}
                               <span className="text-sm font-medium">
-                                {result.result === "authentic" ? "Authentic" : "Suspicious"}
+                                {result.result === "authentic"
+                                  ? "Authentic"
+                                  : "Suspicious"}
                               </span>
                             </div>
                             <span className="text-xs text-muted-foreground">
-                              {result.confidence}%
+                              {result.confidence}% Overall
                             </span>
                           </div>
                           <p className="text-xs text-muted-foreground truncate">
                             {result.filename}
                           </p>
-                          <Progress 
-                            value={result.confidence} 
+                          <Progress
+                            value={result.confidence}
                             className="mt-2 h-2"
                           />
+
+                          {result.type === 'video' && result.analysis.faceResult && result.analysis.audioResult && (
+                            <div className="mt-3 pt-3 border-t border-border/20 text-xs space-y-1">
+                              <div className="flex justify-between items-center">
+                                <span>
+                                  Face Analysis:
+                                  {" "}
+                                  <span className={`font-semibold ml-1 ${result.analysis.faceResult.label === 'real' ? 'text-green-600' : 'text-red-600'}`}>
+                                    {result.analysis.faceResult.label}
+                                  </span>
+                                </span>
+                                <span className="text-muted-foreground">
+                                  {Math.round(result.analysis.faceResult.confidence * 100)}%
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span>
+                                  Audio Analysis: <span className={`font-semibold ml-1 ${result.analysis.audioResult.label === 'bonafide' ? 'text-green-600': 'text-red-600'}`}>
+                                    {result.analysis.audioResult.label}
+                                  </span>
+                                </span>
+                                <span className="text-muted-foreground">
+                                  {Math.round(result.analysis.audioResult.confidence * 100)}%
+                                </span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))
                     )}
