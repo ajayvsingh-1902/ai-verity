@@ -319,13 +319,3 @@ const History = () => {
 };
 
 export default History;
-import { useAuth } from "../hooks/useAuth";
-import { Navigate } from "react-router-dom";
-
-export default function History() {
-  const { user } = useAuth();
-
-  if (!user) return <Navigate to="/login" replace />;
-
-  return <div>This is your History page 📜</div>;
-}
