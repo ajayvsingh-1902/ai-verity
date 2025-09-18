@@ -1,7 +1,5 @@
 # VERITAS – Latin for “Truth”, powered by AI 🛡️🤖
 
-Thrilled to share that our team secured **#5 position at HackIndore 3.0 (2025, SGSITS Indore)** with our project **VERITAS**! 🎉
-
 🌐 **Live Website** → [ai-verity.lovable.app](https://ai-verity.lovable.app/)
 
 ---
