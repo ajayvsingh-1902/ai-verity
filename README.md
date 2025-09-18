@@ -16,7 +16,7 @@ Our goal: to build an AI-powered shield against fake content and help preserve t
 **🌐 Website**
 - Frontend → HTML, CSS, React  
 
-**🧠 ML models used **
+**🧠 ML models used**
 - Gemini API  
 - ASVspoof dataset
 - FaceForensics++ dataset
