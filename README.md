@@ -1,7 +1,7 @@
 # VERITAS – Latin for “Truth”, powered by AI 🛡️🤖
 
 🌐 **Live Website** → [ai-verity.lovable.app](https://ai-verity.lovable.app/)
-
+(After every analysis make sure to refresh our website for better accuracy)
 ---
 
 ## 📌 About the Project
@@ -14,19 +14,13 @@ Our goal: to build an AI-powered shield against fake content and help preserve t
 
 ## ⚙️ Tech Stack
 **🌐 Website**
-- Backend → Spring Boot  
 - Frontend → HTML, CSS, React  
 
-**🧠 ML Backend**
+**🧠 ML models used **
 - Gemini API  
-- Pretrained models (text/audio/video)
-
----  
-
-We learned:
-- How to align diverse datasets (text, audio, video)  
-- Model training and optimization under resource constraints  
-- Integration of ML models into a full-stack web application  
+- ASVspoof dataset
+- FaceForensics++ dataset
+(text/audio/video)
  
 ---
 
