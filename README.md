@@ -2,7 +2,7 @@
 
 🌐 **Live Website** → [ai-verity.lovable.app](https://ai-verity.lovable.app/)
 
-(After every analysis make sure to refresh our website for better accuracy)
+(After every analysis make sure to refresh our website for correct results and accuracy)
 ---
 
 ## 📌 About the Project
